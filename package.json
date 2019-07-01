@@ -7,7 +7,7 @@
   "private": true,
   "scripts": {
     "dev": "parcel serve index.html -d build",
-    "prod": "parcel build index.html -d docs"
+    "prod": "parcel build index.html -d docs --public-url ./"
   },
   "devDependencies": {
     "@babel/core": "^7.4.5",
