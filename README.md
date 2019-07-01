@@ -3,7 +3,7 @@
 ## Running 
 
 ```
-yarn install`
+yarn install
 ```
 
 OR
