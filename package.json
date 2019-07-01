@@ -6,13 +6,15 @@
   "license": "Commercial",
   "private": true,
   "scripts": {
-    "dev": "parcel index.html"
+    "dev": "parcel serve index.html -d build",
+    "prod": "parcel build index.html -d dist"
   },
   "devDependencies": {
     "@babel/core": "^7.4.5",
     "@babel/plugin-proposal-class-properties": "^7.4.4",
     "@babel/plugin-proposal-decorators": "^7.4.4",
     "@babel/preset-env": "^7.4.5",
+    "cssnano": "^4.1.10",
     "elm-hot": "^1.1.0",
     "node-elm-compiler": "^5.0.3"
   },
@@ -37,9 +39,9 @@
   },
   "dependencies": {
     "prosemirror-example-setup": "^1.0.1",
+    "prosemirror-model": "latest",
     "prosemirror-schema-basic": "^1.0.1",
     "prosemirror-schema-list": "latest",
-    "prosemirror-model": "latest",
     "prosemirror-state": "latest",
     "prosemirror-view": "latest"
   }

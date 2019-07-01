@@ -53,11 +53,7 @@ update msg model =
                     , Cmd.none
                     )
 
-                Err err ->
-                    let
-                        _ =
-                            Debug.log "Oh snap!" err
-                    in
+                Err _ ->
                     ( model
                     , Cmd.none
                     )

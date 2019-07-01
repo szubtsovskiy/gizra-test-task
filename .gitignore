@@ -62,4 +62,4 @@ typings/
 
 elm-stuff/
 .cache
-dist/
+build/
