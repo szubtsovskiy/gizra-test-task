@@ -1,21 +1,28 @@
-module Main exposing (main)
+port module Main exposing (main)
 
-import Browser exposing (Document)
+import Browser
 import Html exposing (..)
+import Html.Attributes exposing (class)
+import Json.Decode as Decode
+import TextEditor
+
+
+port docChanges : (Decode.Value -> msg) -> Sub msg
 
 
 type alias Model =
-    { text : String
+    { paragraphs : List String
     }
 
 
 type Msg
     = NoOp
+    | TextChanged Decode.Value
 
 
 main : Program () Model Msg
 main =
-    Browser.document
+    Browser.element
         { init = init
         , view = view
         , update = update
@@ -25,7 +32,7 @@ main =
 
 init : () -> ( Model, Cmd Msg )
 init () =
-    ( { text = ""
+    ( { paragraphs = []
       }
     , Cmd.none
     )
@@ -39,24 +46,40 @@ update msg model =
             , Cmd.none
             )
 
+        TextChanged doc ->
+            case Decode.decodeValue TextEditor.document doc of
+                Ok paragraphs ->
+                    ( { model | paragraphs = paragraphs }
+                    , Cmd.none
+                    )
 
-view : Model -> Document Msg
+                Err err ->
+                    let
+                        _ =
+                            Debug.log "Oh snap!" err
+                    in
+                    ( model
+                    , Cmd.none
+                    )
+
+
+view : Model -> Html Msg
 view model =
     let
-        body =
-            [ textEditor
-            ]
+        viewParagraph t =
+            p [] [ text t ]
     in
-    { title = "Gizra Test"
-    , body = body
-    }
+    div []
+        [ textEditor [ class "text-editor" ] []
+        , div [ class "extracted-text" ] (List.map viewParagraph model.paragraphs)
+        ]
 
 
-textEditor : Html Msg
+textEditor : List (Attribute msg) -> List (Html msg) -> Html msg
 textEditor =
-    Html.node "text-editor" [] []
+    Html.node "text-editor"
 
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    Sub.none
+    docChanges TextChanged

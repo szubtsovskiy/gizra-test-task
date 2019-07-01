@@ -4,6 +4,7 @@ import {Schema, DOMParser} from 'prosemirror-model'
 import {schema} from 'prosemirror-schema-basic'
 import {addListNodes} from 'prosemirror-schema-list'
 import {exampleSetup} from 'prosemirror-example-setup'
+import App from './App';
 
 @CustomElement('text-editor')
 class TextEditor extends HTMLElement {
@@ -13,19 +14,20 @@ class TextEditor extends HTMLElement {
     }
 
     connectedCallback() {
-        console.log('TextEditor init...');
-
         const mySchema = new Schema({
             nodes: addListNodes(schema.spec.nodes, 'paragraph block*', 'block'),
             marks: schema.spec.marks
         });
 
-        const content = document.createElement('div');
-        this.appendChild(content);
 
         let wordCountDisplay = new Plugin({
             props: {
                 decorations({doc}) {
+                    const app = App.get();
+                    if (app && app.ports && app.ports.docChanges) {
+                        app.ports.docChanges.send(doc.content.toJSON());
+                    }
+                    
                     const decorations = [];
                     doc.content.forEach((node, offset) => {
                         if (node.type.name !== 'paragraph' || node.content.size === 0) {
@@ -55,7 +57,7 @@ class TextEditor extends HTMLElement {
 
         this.editor = new EditorView(this, {
             state: EditorState.create({
-                doc: DOMParser.fromSchema(mySchema).parse(content),
+                doc: DOMParser.fromSchema(mySchema).parse(document.createTextNode('')),
                 plugins: exampleSetup({schema: mySchema}).concat([wordCountDisplay])
             })
         });
