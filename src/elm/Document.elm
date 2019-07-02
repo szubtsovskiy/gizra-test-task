@@ -1,20 +1,38 @@
-module TextEditor exposing (document)
+module Document exposing (Document, decoder, empty, mapParagraphs)
 
-import Json.Decode exposing (Decoder, Value, andThen, field, index, list, map, oneOf, string, succeed)
+import Json.Decode
+    exposing
+        ( Decoder
+        , Value
+        , andThen
+        , field
+        , index
+        , list
+        , map
+        , oneOf
+        , string
+        , succeed
+        )
 
 
 type alias Paragraph =
     String
 
 
-type alias Document =
-    List Paragraph
+type Document
+    = Document (List Paragraph)
 
 
-document : Decoder Document
-document =
+empty : Document
+empty =
+    Document []
+
+
+decoder : Decoder Document
+decoder =
     list paragraph
         |> map (List.filterMap identity)
+        |> map Document
 
 
 paragraph : Decoder (Maybe Paragraph)
@@ -32,3 +50,8 @@ paragraph =
                     _ ->
                         succeed Nothing
             )
+
+
+mapParagraphs : (Paragraph -> a) -> Document -> List a
+mapParagraphs f (Document paragraphs) =
+    List.map f paragraphs

@@ -1,23 +1,21 @@
-port module Main exposing (main)
+module Main exposing (main)
 
 import Browser
+import Document exposing (Document)
 import Html exposing (..)
 import Html.Attributes exposing (class)
+import Html.Events exposing (on)
 import Json.Decode as Decode
-import TextEditor
-
-
-port docChanges : (Decode.Value -> msg) -> Sub msg
 
 
 type alias Model =
-    { paragraphs : List String
+    { document : Document
     }
 
 
 type Msg
     = NoOp
-    | TextChanged Decode.Value
+    | DocumentChanged Document
 
 
 main : Program () Model Msg
@@ -32,7 +30,7 @@ main =
 
 init : () -> ( Model, Cmd Msg )
 init () =
-    ( { paragraphs = []
+    ( { document = Document.empty
       }
     , Cmd.none
     )
@@ -46,28 +44,24 @@ update msg model =
             , Cmd.none
             )
 
-        TextChanged doc ->
-            case Decode.decodeValue TextEditor.document doc of
-                Ok paragraphs ->
-                    ( { model | paragraphs = paragraphs }
-                    , Cmd.none
-                    )
-
-                Err _ ->
-                    ( model
-                    , Cmd.none
-                    )
+        DocumentChanged doc ->
+            ( { model | document = doc }
+            , Cmd.none
+            )
 
 
 view : Model -> Html Msg
 view model =
     let
+        onDocumentChange tagger =
+            on "document-change" (Decode.map tagger (Decode.field "detail" Document.decoder))
+
         viewParagraph t =
             p [] [ text t ]
     in
     div []
-        [ textEditor [ class "text-editor" ] []
-        , div [ class "extracted-text" ] (List.map viewParagraph model.paragraphs)
+        [ textEditor [ class "text-editor", onDocumentChange DocumentChanged ] []
+        , div [ class "extracted-text" ] (Document.mapParagraphs viewParagraph model.document)
         ]
 
 
@@ -78,4 +72,4 @@ textEditor =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    docChanges TextChanged
+    Sub.none
